@@ -33,7 +33,7 @@ github
 
 ## Portfolio Link
 
-`https://diegolibonati.github.io/DiegoLibonatiWeb/#/projects?q=Github%20profile%20page`
+`https://diegolibonati.github.io/DiegoLibonatiWeb/#/projects?q=Github%20Profile%20Page`
 
 ## Video
 
