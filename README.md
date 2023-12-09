@@ -23,17 +23,9 @@ I made a web page that allows the user to search for github profiles. If you fin
 2. CSS3
 3. HTML5
 
-## Galery
-
-![Github-page](https://raw.githubusercontent.com/DiegoLibonati/DiegoLibonatiWeb/main/data/projects/Javascript/Imagenes/github-0.jpg)
-
-![Github-page](https://raw.githubusercontent.com/DiegoLibonati/DiegoLibonatiWeb/main/data/projects/Javascript/Imagenes/github-1.jpg)
-github
-![Github-page](https://raw.githubusercontent.com/DiegoLibonati/DiegoLibonatiWeb/main/data/projects/Javascript/Imagenes/github-2.jpg)
-
 ## Portfolio Link
 
-`https://diegolibonati.github.io/DiegoLibonatiWeb/#/projects?q=Github%20Profile%20Page`
+[`https://www.diegolibonati.com.ar/#/project/73`](https://www.diegolibonati.com.ar/#/project/73)
 
 ## Video
 
