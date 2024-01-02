@@ -1,48 +1,5 @@
-# Github-Profile-Page
+import { Profile, Repo } from "./entities/vite-env";
 
-## Getting Started
-
-1. Clone the repository
-2. Join to the correct path of the clone
-3. Install LiveServer extension from Visual Studio Code [OPTIONAL]
-4. Click in "Go Live" from LiveServer extension
-
----
-
-1. Clone the repository
-2. Join to the correct path of the clone
-3. Open index.html in your favorite navigator
-
----
-
-1. Clone the repository
-2. Join to the correct path of the clone
-3. Execute: `yarn install`
-4. Execute: `yarn dev`
-
-## Description
-
-I made a web page that allows the user to search for github profiles. If you find a profile it will show: its profile image, its user, its description, how many followers it has, how many people it follows and how many repos it has. And it will make a list of buttons with each repo, also if you click on any repo it will take you to the official link of that repository in github. If it doesn't find it, it will launch an alert.
-
-## Technologies used
-
-1. Typescript
-2. CSS3
-3. HTML5
-
-## Portfolio Link
-
-[`https://www.diegolibonati.com.ar/#/project/73`](https://www.diegolibonati.com.ar/#/project/73)
-
-## Video
-
-https://user-images.githubusercontent.com/99032604/198900756-5b0d19d8-5779-47ed-b0fe-d27ef1a4c37d.mp4
-
-## Documentation
-
-In `containerCard` you get the element in which we are going to dump all the profile information. In `inputSearchProfile` we use it to obtain the value of the input and in `buttonSearchProfile` will be the button to search in the API the value that we enter in the input:
-
-```
 const containerCard = document.querySelector(
   ".section_container_card"
 ) as HTMLElement;
@@ -55,11 +12,7 @@ const inputSearchProfile = document.querySelector(
 const buttonSearchProfile = document.querySelector(
   ".section_container_search button"
 ) as HTMLButtonElement;
-```
 
-When you click on buttonSearchProfile what it will do is to get the value of the input to search for the github profile. Based on the response it will filter the corresponding html.
-
-```
 buttonSearchProfile.addEventListener("click", async () => {
   const inputSearchProfileValue: string = inputSearchProfile.value;
 
@@ -83,11 +36,7 @@ buttonSearchProfile.addEventListener("click", async () => {
       createHTMLRepositories(githubProfileReposUrl);
   }
 });
-```
 
-This function `getGithubProfile()` is the one in charge of getting the information from the api passing it by parameter the value of the input in which we enter the name of the profile to look for:
-
-```
 const getGithubProfile = async (profile: string): Promise<Profile> => {
   const request = await fetch(`https://api.github.com/users/${profile}`);
 
@@ -112,11 +61,7 @@ const getGithubProfile = async (profile: string): Promise<Profile> => {
 
   return response;
 };
-```
 
-This function `getGithubProfileRepos()` is in charge of fetching all the repositories if it has the account associated with the name entered:
-
-```
 const getGithubProfileRepos = async (reposLink: string): Promise<Repo[]> => {
   const request = await fetch(`${reposLink}`);
 
@@ -127,11 +72,7 @@ const getGithubProfileRepos = async (reposLink: string): Promise<Repo[]> => {
   const response: Repo[] = await request.json();
   return response;
 };
-```
 
-This function `createHTMLWithOutRepositories()` is in charge of generating the HTML without the repositories that will later be added in the relevant container:
-
-```
 const createHTMLWithOutRepositories = (
   img: string,
   name: string,
@@ -141,7 +82,7 @@ const createHTMLWithOutRepositories = (
   reposCount: number
 ): string => {
   return `
-
+    
         <div class="section_container_card-img">
             <img src="${img}" alt="${name}">
         </div>
@@ -159,16 +100,12 @@ const createHTMLWithOutRepositories = (
                 <h3><span>${reposCount}</span>Repos</h3>
 
             </div>
-
+        
         </div>
 
     `;
 };
-```
 
-This function `createHTMLRepositories()` is in charge of generating the HTML of the repositories, basically it will generate 10 repositories, that is to say, 10 li elements that will be integrated to an ordered list:
-
-```
 const createHTMLRepositories = (repo: Repo[]): void => {
   const div = document.createElement("DIV");
   const h3 = document.createElement("H3");
@@ -191,4 +128,3 @@ const createHTMLRepositories = (repo: Repo[]): void => {
     ul.innerHTML += `<li><a href=${repo[i].html_url} target="BLANK">${repo[i].name}</a></li>`;
   }
 };
-```
