@@ -1,10 +1,33 @@
+import { getGithubProfile } from "./api/getGithubProfile";
+import { getGithubProfileRepos } from "./api/getGithubProfileRepos";
 import { Profile, Repo } from "./entities/vite-env";
+import { buttonRepo } from "./helpers/buttonRepo";
+import { clearHtml } from "./helpers/clearHtml";
+import "./styles.css";
 
-const containerCard = document.querySelector(
+const alertH2 = document.querySelector(".alert_h2") as HTMLHeadingElement;
+const alertContainer = document.querySelector(".alert") as HTMLHeadingElement;
+const containerCardInit = document.querySelector(
+  ".section_container_card_init"
+) as HTMLElement;
+const containerCardProfile = document.querySelector(
   ".section_container_card"
 ) as HTMLElement;
-const headerSectionH2 = document.querySelector(
-  ".header_section_h2"
+const imgProfile = document.getElementById("img-profile") as HTMLImageElement;
+const nameProfile = document.getElementById(
+  "name-profile"
+) as HTMLHeadingElement;
+const descriptionProfile = document.getElementById(
+  "description-profile"
+) as HTMLParagraphElement;
+const followersProfile = document.getElementById(
+  "followers-profile"
+) as HTMLHeadingElement;
+const followingProfile = document.getElementById(
+  "following-profile"
+) as HTMLHeadingElement;
+const reposProfile = document.getElementById(
+  "repos-profile"
 ) as HTMLHeadingElement;
 const inputSearchProfile = document.querySelector(
   ".section_container_search input"
@@ -12,119 +35,85 @@ const inputSearchProfile = document.querySelector(
 const buttonSearchProfile = document.querySelector(
   ".section_container_search button"
 ) as HTMLButtonElement;
+const reposContainer = document.querySelector(".card-repos") as HTMLDivElement;
+const listReposContainer = document.querySelector(
+  ".card-repos-list"
+) as HTMLUListElement;
+
+let firstSearch = true;
 
 buttonSearchProfile.addEventListener("click", async () => {
+  if (!firstSearch)
+    clearHtml(
+      imgProfile,
+      nameProfile,
+      descriptionProfile,
+      followersProfile,
+      followingProfile,
+      reposProfile,
+      reposContainer,
+      listReposContainer
+    );
+
   const inputSearchProfileValue: string = inputSearchProfile.value;
 
   const githubProfile = await getGithubProfile(inputSearchProfileValue);
 
-  containerCard.innerHTML = createHTMLWithOutRepositories(
-    githubProfile.avatar_url || "",
-    githubProfile.name || "N/A",
-    githubProfile.bio || "N/A",
-    githubProfile.followers || 0,
-    githubProfile.following || 0,
-    githubProfile.public_repos || 0
-  );
+  inputSearchProfile.value = "";
 
-  if (githubProfile.repos_url) {
-    const githubProfileReposUrl = await getGithubProfileRepos(
-      githubProfile.repos_url
-    );
+  if (!githubProfile) {
+    containerCardInit.style.display = "flex";
+    containerCardProfile.style.display = "none";
 
-    if (githubProfileReposUrl.length > 0)
-      createHTMLRepositories(githubProfileReposUrl);
-  }
-});
-
-const getGithubProfile = async (profile: string): Promise<Profile> => {
-  const request = await fetch(`https://api.github.com/users/${profile}`);
-
-  if (!request.ok) {
     console.log("The profile dosen´t exist");
-    headerSectionH2.innerHTML = `The profile dosen´t exist 😔`;
-    headerSectionH2.classList.add("show-info");
+    alertH2.innerHTML = `The profile dosen´t exist 😔`;
+    alertContainer.style.opacity = "100";
 
     setTimeout(() => {
-      headerSectionH2.classList.remove("show-info");
+      alertContainer.style.opacity = "0";
     }, 2000);
+
+    return;
   }
 
-  headerSectionH2.innerHTML = `The profile exist ✅`;
-  headerSectionH2.classList.add("show-info");
+  const profile = githubProfile as Profile;
+
+  containerCardInit.style.display = "none";
+  containerCardProfile.style.display = "flex";
+
+  imgProfile.src = profile.avatar_url;
+  imgProfile.alt = profile.name;
+  nameProfile.textContent = profile.name || "N/A";
+  descriptionProfile.textContent = profile.bio || "N/A";
+  followersProfile.prepend(String(profile.followers) || "0");
+  followingProfile.prepend(String(profile.following) || "0");
+  reposProfile.prepend(String(profile.public_repos) || "0");
+
+  const githubProfileReposUrl = await getGithubProfileRepos(profile.repos_url);
+
+  if (
+    typeof githubProfileReposUrl === "object" &&
+    githubProfileReposUrl.length > 0
+  ) {
+    const repos = githubProfileReposUrl as Repo[];
+
+    reposContainer.style.display = "flex";
+
+    repos.slice(0, 8).forEach((repo) => {
+      const li = buttonRepo(repo.html_url, repo.name);
+
+      listReposContainer.append(li);
+    });
+  }
+
+  alertH2.innerHTML = `The profile exist ✅`;
+  alertContainer.style.opacity = "100";
 
   setTimeout(() => {
-    headerSectionH2.classList.remove("show-info");
+    alertContainer.style.opacity = "0";
   }, 2500);
 
-  const response: Profile = await request.json();
+  firstSearch = false;
 
-  return response;
-};
-
-const getGithubProfileRepos = async (reposLink: string): Promise<Repo[]> => {
-  const request = await fetch(`${reposLink}`);
-
-  if (!request.ok) {
-    console.log("The repos profile dosen´t exist");
-  }
-
-  const response: Repo[] = await request.json();
-  return response;
-};
-
-const createHTMLWithOutRepositories = (
-  img: string,
-  name: string,
-  description: string,
-  followers: number,
-  following: number,
-  reposCount: number
-): string => {
-  return `
-    
-        <div class="section_container_card-img">
-            <img src="${img}" alt="${name}">
-        </div>
-
-        <div class="section_container_card-information">
-
-            <h2>${name}</h2>
-
-            <p>${description}</p>
-
-            <div class="card-followers">
-
-                <h3><span>${followers}</span>Followers</h3>
-                <h3><span>${following}</span>Following</h3>
-                <h3><span>${reposCount}</span>Repos</h3>
-
-            </div>
-        
-        </div>
-
-    `;
-};
-
-const createHTMLRepositories = (repo: Repo[]): void => {
-  const div = document.createElement("DIV");
-  const h3 = document.createElement("H3");
-  const ul = document.createElement("UL");
-
-  div.setAttribute("class", "card-repos");
-  ul.setAttribute("class", "card-repos-list");
-
-  const containerCardInformation = document.querySelector(
-    ".section_container_card-information"
-  ) as HTMLElement;
-
-  containerCardInformation.append(div);
-  div.append(h3);
-  div.append(ul);
-
-  h3.innerHTML = "Repositories";
-
-  for (let i = 0; i < 10; i++) {
-    ul.innerHTML += `<li><a href=${repo[i].html_url} target="BLANK">${repo[i].name}</a></li>`;
-  }
-};
+  return;
+});

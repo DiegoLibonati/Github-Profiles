@@ -40,14 +40,32 @@ https://user-images.githubusercontent.com/99032604/198900756-5b0d19d8-5779-47ed-
 
 ## Documentation
 
-In `containerCard` you get the element in which we are going to dump all the profile information. In `inputSearchProfile` we use it to obtain the value of the input and in `buttonSearchProfile` will be the button to search in the API the value that we enter in the input:
+In container card you get the element in which we are going to dump all the profile information. In `inputSearchProfile` we use it to obtain the value of the input and in `buttonSearchProfile` will be the button to search in the API the value that we enter in the input:
 
 ```
-const containerCard = document.querySelector(
+const alertH2 = document.querySelector(".alert_h2") as HTMLHeadingElement;
+const alertContainer = document.querySelector(".alert") as HTMLHeadingElement;
+const containerCardInit = document.querySelector(
+  ".section_container_card_init"
+) as HTMLElement;
+const containerCardProfile = document.querySelector(
   ".section_container_card"
 ) as HTMLElement;
-const headerSectionH2 = document.querySelector(
-  ".header_section_h2"
+const imgProfile = document.getElementById("img-profile") as HTMLImageElement;
+const nameProfile = document.getElementById(
+  "name-profile"
+) as HTMLHeadingElement;
+const descriptionProfile = document.getElementById(
+  "description-profile"
+) as HTMLParagraphElement;
+const followersProfile = document.getElementById(
+  "followers-profile"
+) as HTMLHeadingElement;
+const followingProfile = document.getElementById(
+  "following-profile"
+) as HTMLHeadingElement;
+const reposProfile = document.getElementById(
+  "repos-profile"
 ) as HTMLHeadingElement;
 const inputSearchProfile = document.querySelector(
   ".section_container_search input"
@@ -55,140 +73,88 @@ const inputSearchProfile = document.querySelector(
 const buttonSearchProfile = document.querySelector(
   ".section_container_search button"
 ) as HTMLButtonElement;
+const reposContainer = document.querySelector(".card-repos") as HTMLDivElement;
+const listReposContainer = document.querySelector(
+  ".card-repos-list"
+) as HTMLUListElement;
 ```
 
 When you click on buttonSearchProfile what it will do is to get the value of the input to search for the github profile. Based on the response it will filter the corresponding html.
 
 ```
 buttonSearchProfile.addEventListener("click", async () => {
+  if (!firstSearch)
+    clearHtml(
+      imgProfile,
+      nameProfile,
+      descriptionProfile,
+      followersProfile,
+      followingProfile,
+      reposProfile,
+      reposContainer,
+      listReposContainer
+    );
+
   const inputSearchProfileValue: string = inputSearchProfile.value;
 
   const githubProfile = await getGithubProfile(inputSearchProfileValue);
 
-  containerCard.innerHTML = createHTMLWithOutRepositories(
-    githubProfile.avatar_url || "",
-    githubProfile.name || "N/A",
-    githubProfile.bio || "N/A",
-    githubProfile.followers || 0,
-    githubProfile.following || 0,
-    githubProfile.public_repos || 0
-  );
+  inputSearchProfile.value = "";
 
-  if (githubProfile.repos_url) {
-    const githubProfileReposUrl = await getGithubProfileRepos(
-      githubProfile.repos_url
-    );
+  if (!githubProfile) {
+    containerCardInit.style.display = "flex";
+    containerCardProfile.style.display = "none";
 
-    if (githubProfileReposUrl.length > 0)
-      createHTMLRepositories(githubProfileReposUrl);
-  }
-});
-```
-
-This function `getGithubProfile()` is the one in charge of getting the information from the api passing it by parameter the value of the input in which we enter the name of the profile to look for:
-
-```
-const getGithubProfile = async (profile: string): Promise<Profile> => {
-  const request = await fetch(`https://api.github.com/users/${profile}`);
-
-  if (!request.ok) {
     console.log("The profile dosen´t exist");
-    headerSectionH2.innerHTML = `The profile dosen´t exist 😔`;
-    headerSectionH2.classList.add("show-info");
+    alertH2.innerHTML = `The profile dosen´t exist 😔`;
+    alertContainer.style.opacity = "100";
 
     setTimeout(() => {
-      headerSectionH2.classList.remove("show-info");
+      alertContainer.style.opacity = "0";
     }, 2000);
+
+    return;
   }
 
-  headerSectionH2.innerHTML = `The profile exist ✅`;
-  headerSectionH2.classList.add("show-info");
+  const profile = githubProfile as Profile;
+
+  containerCardInit.style.display = "none";
+  containerCardProfile.style.display = "flex";
+
+  imgProfile.src = profile.avatar_url;
+  imgProfile.alt = profile.name;
+  nameProfile.textContent = profile.name || "N/A";
+  descriptionProfile.textContent = profile.bio || "N/A";
+  followersProfile.prepend(String(profile.followers) || "0");
+  followingProfile.prepend(String(profile.following) || "0");
+  reposProfile.prepend(String(profile.public_repos) || "0");
+
+  const githubProfileReposUrl = await getGithubProfileRepos(profile.repos_url);
+
+  if (
+    typeof githubProfileReposUrl === "object" &&
+    githubProfileReposUrl.length > 0
+  ) {
+    const repos = githubProfileReposUrl as Repo[];
+
+    reposContainer.style.display = "flex";
+
+    repos.slice(0, 8).forEach((repo) => {
+      const li = buttonRepo(repo.html_url, repo.name);
+
+      listReposContainer.append(li);
+    });
+  }
+
+  alertH2.innerHTML = `The profile exist ✅`;
+  alertContainer.style.opacity = "100";
 
   setTimeout(() => {
-    headerSectionH2.classList.remove("show-info");
+    alertContainer.style.opacity = "0";
   }, 2500);
 
-  const response: Profile = await request.json();
+  firstSearch = false;
 
-  return response;
-};
-```
-
-This function `getGithubProfileRepos()` is in charge of fetching all the repositories if it has the account associated with the name entered:
-
-```
-const getGithubProfileRepos = async (reposLink: string): Promise<Repo[]> => {
-  const request = await fetch(`${reposLink}`);
-
-  if (!request.ok) {
-    console.log("The repos profile dosen´t exist");
-  }
-
-  const response: Repo[] = await request.json();
-  return response;
-};
-```
-
-This function `createHTMLWithOutRepositories()` is in charge of generating the HTML without the repositories that will later be added in the relevant container:
-
-```
-const createHTMLWithOutRepositories = (
-  img: string,
-  name: string,
-  description: string,
-  followers: number,
-  following: number,
-  reposCount: number
-): string => {
-  return `
-
-        <div class="section_container_card-img">
-            <img src="${img}" alt="${name}">
-        </div>
-
-        <div class="section_container_card-information">
-
-            <h2>${name}</h2>
-
-            <p>${description}</p>
-
-            <div class="card-followers">
-
-                <h3><span>${followers}</span>Followers</h3>
-                <h3><span>${following}</span>Following</h3>
-                <h3><span>${reposCount}</span>Repos</h3>
-
-            </div>
-
-        </div>
-
-    `;
-};
-```
-
-This function `createHTMLRepositories()` is in charge of generating the HTML of the repositories, basically it will generate 10 repositories, that is to say, 10 li elements that will be integrated to an ordered list:
-
-```
-const createHTMLRepositories = (repo: Repo[]): void => {
-  const div = document.createElement("DIV");
-  const h3 = document.createElement("H3");
-  const ul = document.createElement("UL");
-
-  div.setAttribute("class", "card-repos");
-  ul.setAttribute("class", "card-repos-list");
-
-  const containerCardInformation = document.querySelector(
-    ".section_container_card-information"
-  ) as HTMLElement;
-
-  containerCardInformation.append(div);
-  div.append(h3);
-  div.append(ul);
-
-  h3.innerHTML = "Repositories";
-
-  for (let i = 0; i < 10; i++) {
-    ul.innerHTML += `<li><a href=${repo[i].html_url} target="BLANK">${repo[i].name}</a></li>`;
-  }
-};
+  return;
+});
 ```
