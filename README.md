@@ -36,7 +36,7 @@ I made a web page that allows the user to search for github profiles. If you fin
 
 ## Video
 
-https://user-images.githubusercontent.com/99032604/198900756-5b0d19d8-5779-47ed-b0fe-d27ef1a4c37d.mp4
+https://github.com/DiegoLibonati/Github-Profile-Page/assets/99032604/7f2dc86a-c82a-4159-bce7-d651991426df
 
 ## Documentation
 
