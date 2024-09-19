@@ -1,4 +1,4 @@
-# Github-Profile-Page
+# Github Profiles
 
 ## Getting Started
 
@@ -32,7 +32,7 @@ I made a web page that allows the user to search for github profiles. If you fin
 
 ## Portfolio Link
 
-[`https://www.diegolibonati.com.ar/#/project/73`](https://www.diegolibonati.com.ar/#/project/73)
+[`https://www.diegolibonati.com.ar/#/project/Github-Profiles`](https://www.diegolibonati.com.ar/#/project/Github-Profiles)
 
 ## Video
 
